@@ -1,11 +1,9 @@
 locals {
   policies = {   
-    # https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
-    # https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
-    # alb_controller = {
-    #   policy      = file("${path.module}/policies/alb_controller.json")
-    #   policy_name = "aws_lb_controller"
-    # }
+    eip = {
+      policy      = file("${path.module}/policies/eip.json")
+      policy_name = "eip-management"
+    }
   }
 }
 

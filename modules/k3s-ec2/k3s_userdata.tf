@@ -27,38 +27,9 @@ data "template_cloudinit_config" "k3s_master_ud" {
 
   part {
     content_type = "text/x-shellscript"
-    content      = templatefile("${path.module}/userdata/install_k3s.sh",  merge(local.template_vars,  {
-                                                                                                  TAINT             = try(each.value.taint, "")
-                                                                                                  EIP               = try(each.value.eyp?"true":"false", "false")
-                                                                                                  CLOUD_ENABLED     = try(each.value.cloud_enabled?"true":"false", "false")
-                                                                                                  BOOTSTRAP_REPO    = try(each.value.bootstrap_repo, "")
-                                                                                                  BOOTSTRAP_PK_PATH = length(try(each.value.bootstrap_pk_path, "")) > 0 ? base64gzip(file(each.value.bootstrap_pk_path)) : ""
-                                                                                                })
-                                                                                              ) 
-  }
-}
-
-data "template_cloudinit_config" "k3s_worker_ud" {
-  for_each = var.k3s_worker_instances
-
-  gzip          = true
-  base64_encode = true
-
-  part {
-    filename     = "init.cfg"
-    content_type = "text/cloud-config"
-    content      = templatefile("${path.module}/userdata/init.cfg", {})
-  }
-
-  part {
-    content_type = "text/x-shellscript"
-    content      = templatefile("${path.module}/userdata/install_k3s.sh", merge(local.template_vars,  {
-                                                                                                        TAINT             = try(each.value.taint, "")
-                                                                                                        EIP               = ""
-                                                                                                        CLOUD_ENABLED     = ""
-                                                                                                        BOOTSTRAP_REPO    = ""
-                                                                                                        BOOTSTRAP_PK_PATH = ""
+    content      = templatefile("${path.module}/userdata/install_k3s.sh",  merge(local.template_vars, {
+                                                                                                        EIP_ID = aws_eip.public[each.key].id
                                                                                                       })
-                                                                                                    )
+                                                                                              ) 
   }
 }

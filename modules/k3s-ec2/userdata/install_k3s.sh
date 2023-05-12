@@ -2,6 +2,9 @@
 
 set -x
 
+apt-get update
+
+apt-get install jq -y
 apt-get install git -y
 
 # install helm
@@ -16,6 +19,19 @@ chmod +x /usr/local/bin/k
 mkdir -p ~/.aws
 echo "[default]" > ~/.aws/config
 echo "region = ${REGION}" >> ~/.aws/config
+
+# in case we are not the only instance alive, we should wait for the other one to die (release eip)
+
+while [ "$(aws ec2 describe-addresses --allocation-ids ${EIP_ID} | jq -r .Addresses[0].InstanceId)" != "null" ];
+do
+  sleep 15;
+done
+
+aws ec2 associate-address --instance-id "$(curl -s http://169.254.169.254/latest/meta-data/instance-id)" --allocation-id ${EIP_ID}
+
+sleep 1m
+
+# install k3s
 
 FLANNEL_IFACE=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)')
 LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
@@ -112,7 +128,7 @@ fi
 # wait for k3s to have Running pods
 until kubectl get pods -A | grep Running > /dev/null; 
 do 
-  sleep 30; 
+  sleep 5; 
 done
 
 echo "== restored configmap=="
@@ -134,5 +150,3 @@ kubectl get ConfigMap k8s-restored -n kube-system -o yaml
 
 # initial backup
 k3s etcd-snapshot save --s3 --s3-bucket=${K3S_BUCKET} --etcd-s3-folder=${K3S_BACKUP_PREFIX} --etcd-s3-region=${REGION}
-
-
