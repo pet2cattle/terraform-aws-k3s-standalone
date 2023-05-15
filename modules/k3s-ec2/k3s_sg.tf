@@ -11,7 +11,7 @@ resource "aws_security_group" "remote_acces_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # TODO: restrict access
+  # SSH
   ingress {
     from_port   = 22
     to_port     = 22

@@ -7,6 +7,8 @@ apt-get update
 apt-get install jq -y
 apt-get install git -y
 
+apt-get install fail2ban -y
+
 # install helm
 curl -fsSL -o - https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 echo "export KUBECONFIG=/etc/rancher/k3s/k3s.yaml" >> /etc/bashrc 
@@ -150,3 +152,14 @@ kubectl get ConfigMap k8s-restored -n kube-system -o yaml
 
 # initial backup
 k3s etcd-snapshot save --s3 --s3-bucket=${K3S_BUCKET} --etcd-s3-folder=${K3S_BACKUP_PREFIX} --etcd-s3-region=${REGION}
+
+cat > /etc/fail2ban/jail.local <<"EOF"
+[DEFAULT]
+bantime = 1h
+
+[sshd]
+enabled = true
+EOF
+
+systemctl restart fail2ban
+
