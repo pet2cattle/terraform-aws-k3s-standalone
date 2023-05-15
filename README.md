@@ -1,1 +1,1 @@
-# aws-k3s-standalone
+# terraform-aws-k3s-standalone
