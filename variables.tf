@@ -48,7 +48,7 @@ variable "buckets" {
 
 # IAM
 
-variable "iam" {
+variable "users" {
   type    = any
   default = {}
 }

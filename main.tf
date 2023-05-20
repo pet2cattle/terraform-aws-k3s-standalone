@@ -21,12 +21,31 @@ module "keypair" {
   tags = var.tags
 }
 
-module "iam" {
-  source = "./modules/iam"
+module "iam-users" {
+  source = "./modules/iam-user"
 
   k3s_cluster_name = var.k3s_cluster_name
 
-  attach_admin = try(var.iam.admin_bootstrap, false)
+  users = var.users
+
+  tags = var.tags
+}
+
+output "secrets" {
+  value = module.iam-users.secrets
+  sensitive = true
+}
+
+output "users" {
+  value = module.iam-users.users
+}
+
+module "instance-profile" {
+  source = "./modules/instance-profile"
+
+  k3s_cluster_name = var.k3s_cluster_name
+
+  attach_admin = false
 
   tags = var.tags
 }
@@ -37,7 +56,7 @@ module "s3" {
   # bucket for backing up the cluster
   k3s_cluster_name = var.k3s_cluster_name
 
-  iam_role_arn = module.iam.iam_role_arn
+  iam_role_arn = module.instance-profile.iam_role_arn
 
   tags = var.tags
 }
@@ -52,8 +71,8 @@ module "k3s-ec2" {
   keypair_name = module.keypair.name
 
   # iam
-  instance_profile_name = module.iam.instance_profile_name
-  iam_role_arn = module.iam.iam_role_arn
+  instance_profile_name = module.instance-profile.instance_profile_name
+  iam_role_arn = module.instance-profile.iam_role_arn
 
   # k3s settings
   k3s_token = var.k3s_token

@@ -12,11 +12,6 @@ variable "attach_admin" {
   default = false
 }
 
-variable "attach_ecr_ro" {
-  type    = bool
-  default = false
-}
-
 # TAGS
 
 variable "tags" {
