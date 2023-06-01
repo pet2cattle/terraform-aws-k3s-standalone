@@ -163,3 +163,9 @@ EOF
 
 systemctl restart fail2ban
 
+for not_ready_node in $(kubectl get nodes | grep "NotReady" | grep -v "$(hostname)" | awk '{ print $1 }');
+do
+  echo "deleting $not_ready_node"
+  kubectl delete node "$not_ready_node"
+  sleep 1
+done
